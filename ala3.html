@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAC Authentication | ALA 3</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            /* Colors */
+            --bg-start: #0f172a;
+            --bg-end: #1e293b;
+            
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --input-border: rgba(255, 255, 255, 0.1);
+            
+            --btn-purple: linear-gradient(135deg, #a855f7, #7c3aed);
+            --btn-green: linear-gradient(135deg, #10b981, #059669);
+            --btn-blue: linear-gradient(135deg, #3b82f6, #2563eb);
+            --btn-red: linear-gradient(135deg, #ef4444, #dc2626);
+            --btn-gray: linear-gradient(135deg, #475569, #334155);
+
+            --success: #10b981;
+            --error: #ef4444;
+
+            /* Radii */
+            --radius-md: 16px;
+            --radius-btn: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Card (Apple Glassmorphism) */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .card-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-header i { color: var(--text-muted); }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Form Elements */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"], input[type="password"], textarea {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-btn);
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+            border-color: #a855f7;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 36px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover { color: var(--text-main); }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--radius-btn);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-purple { background: var(--btn-purple); }
+        .btn-green { background: var(--btn-green); }
+        .btn-blue { background: var(--btn-blue); }
+        .btn-red { background: var(--btn-red); }
+        .btn-gray { background: var(--btn-gray); }
+
+        .copy-btn {
+            position: absolute;
+            top: 32px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+
+        /* Output Displays */
+        .mac-output {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            padding: 14px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            position: relative;
+            margin-top: 5px;
+            color: var(--text-main);
+        }
+
+        /* Result Box */
+        .result-box {
+            padding: 20px;
+            border-radius: var(--radius-btn);
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s;
+        }
+
+        .result-box.show { opacity: 1; transform: translateY(0); }
+
+        .result-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .result-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        /* Toasts */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .toast {
+            background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1); color: white;
+            padding: 12px 20px; border-radius: 8px; font-size: 0.9rem;
+            font-weight: 500; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            animation: slideInRight 0.3s forwards, fadeOut 0.3s forwards 2.7s;
+        }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        
+        .loader {
+            border: 2px solid rgba(255,255,255,0.2); border-top: 2px solid white;
+            border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Animation class for tampering */
+        .tamper-anim { animation: shake 0.5s; }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .controls { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <header>
+            <h1 class="title">MAC-Based Message Authentication</h1>
+            <p class="subtitle">Secure integrity & authentication using HMAC SHA-256</p>
+        </header>
+
+        <!-- Sender Panel -->
+        <section class="card" id="sender-panel">
+            <div class="card-header">
+                <i data-lucide="send"></i>
+                <h2>1. Sender Panel</h2>
+            </div>
+            
+            <div class="input-group">
+                <label>Message Content</label>
+                <textarea id="sender-msg" placeholder="Type secret message here..."></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label>Shared Secret Key</label>
+                <input type="password" id="sender-key" placeholder="Enter secure symmetric key...">
+                <i data-lucide="eye" class="password-toggle" onclick="togglePassword('sender-key', this)"></i>
+            </div>
+            
+            <div class="controls">
+                <button id="btn-generate" class="btn btn-purple">
+                    <i data-lucide="cpu" id="icon-generate"></i>
+                    <div class="loader" id="ldr-generate"></div>
+                    Generate MAC
+                </button>
+            </div>
+
+            <div class="input-group" style="margin-top: 24px;" id="sender-output-container">
+                <label>Generated HMAC (SHA-256 Hex)</label>
+                <div class="mac-output" id="sender-mac-output">-</div>
+                <button class="copy-btn" onclick="copyMac()"><i data-lucide="copy" style="width:14px;height:14px;"></i></button>
+            </div>
+
+            <div class="controls" style="border-top: 1px solid var(--card-border); padding-top: 20px; margin-top:20px;">
+                <button id="btn-send" class="btn btn-blue" disabled>
+                    <i data-lucide="arrow-down-circle"></i> Send to Receiver (Simulate)
+                </button>
+                <button id="btn-download" class="btn btn-gray" style="display:none;">
+                    <i data-lucide="download"></i> Target TXT
+                </button>
+            </div>
+        </section>
+
+        <!-- Receiver Panel -->
+        <section class="card" id="receiver-panel">
+            <div class="card-header">
+                <i data-lucide="inbox"></i>
+                <h2>2. Receiver Panel</h2>
+            </div>
+            
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Received Message</label>
+                    <textarea id="recv-msg" placeholder="Waiting for data..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Shared Secret Key</label>
+                    <!-- Auto-filling the key for simulation sake natively, but keeping input open -->
+                    <input type="password" id="recv-key" placeholder="Enter symmetric key...">
+                    <i data-lucide="eye" class="password-toggle" onclick="togglePassword('recv-key', this)"></i>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Received MAC Code</label>
+                <input type="text" id="recv-mac" placeholder="Waiting for MAC..." style="font-family: 'Fira Code', monospace; font-size: 0.85rem;">
+            </div>
+            
+            <div class="controls">
+                <button id="btn-verify" class="btn btn-green">
+                    <i data-lucide="shield-check" id="icon-verify"></i>
+                    <div class="loader" id="ldr-verify"></div>
+                    Verify Authentication
+                </button>
+                <button id="btn-tamper" class="btn btn-red" disabled>
+                    <i data-lucide="alert-triangle"></i> Simulate Tampering
+                </button>
+            </div>
+
+            <div id="verify-result" class="result-box" style="display:none;"></div>
+        </section>
+
+        <div style="text-align: center; display:flex; justify-content:center; gap: 16px; margin-top: 10px;">
+            <button id="btn-clear" class="btn btn-gray"><i data-lucide="refresh-ccw"></i> Reset Simulation</button>
+            <a href="home.html" class="btn btn-gray" style="text-decoration:none;"><i data-lucide="arrow-left"></i> Home</a>
+        </div>
+
+    </div>
+
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // UI Selectors
+        const senderMsg = document.getElementById('sender-msg');
+        const senderKey = document.getElementById('sender-key');
+        const senderMacOut = document.getElementById('sender-mac-output');
+        
+        const recvMsg = document.getElementById('recv-msg');
+        const recvKey = document.getElementById('recv-key');
+        const recvMac = document.getElementById('recv-mac');
+        const verifyResult = document.getElementById('verify-result');
+
+        const btnGen = document.getElementById('btn-generate');
+        const btnSend = document.getElementById('btn-send');
+        const btnVerify = document.getElementById('btn-verify');
+        const btnTamper = document.getElementById('btn-tamper');
+        const btnDownload = document.getElementById('btn-download');
+        const btnClear = document.getElementById('btn-clear');
+
+        // Helpers
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            const icon = type === 'error' ? '<i data-lucide="x-circle" style="color:var(--error);"></i>' : '<i data-lucide="check-circle" style="color:var(--success);"></i>';
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function togglePassword(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconElement.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                iconElement.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function copyMac() {
+            if(senderMacOut.textContent === '-') return;
+            navigator.clipboard.writeText(senderMacOut.textContent).then(() => {
+                showToast("MAC copied to clipboard");
+            });
+        }
+
+        function hexToBuffer(hexString) {
+            if (hexString.length % 2 !== 0) throw new Error("Invalid hex string");
+            const buf = new Uint8Array(hexString.length / 2);
+            for (let i = 0; i < hexString.length; i += 2) {
+                buf[i / 2] = parseInt(hexString.substring(i, i + 2), 16);
+            }
+            return buf;
+        }
+
+        function bufferToHex(buffer) {
+            return Array.from(new Uint8Array(buffer))
+                 .map(b => b.toString(16).padStart(2, '0'))
+                 .join('');
+        }
+
+        async function createHmacNode(keyText, msgText) {
+            const encoder = new TextEncoder();
+            const cryptoKey = await window.crypto.subtle.importKey(
+                "raw",
+                encoder.encode(keyText),
+                { name: "HMAC", hash: { name: "SHA-256" } },
+                false,
+                ["sign", "verify"]
+            );
+            return { cryptoKey, encodedMsg: encoder.encode(msgText) };
+        }
+
+        // 1. Generate MAC
+        btnGen.addEventListener('click', async () => {
+            if(!senderMsg.value.trim() || !senderKey.value.trim()) {
+                return showToast("Message and Secret Key are required!", "error");
+            }
+
+            // Spinner Logic
+            btnGen.disabled = true;
+            document.getElementById('icon-generate').style.display = 'none';
+            document.getElementById('ldr-generate').style.display = 'block';
+
+            try {
+                const { cryptoKey, encodedMsg } = await createHmacNode(senderKey.value, senderMsg.value);
+                const signatureBuffer = await window.crypto.subtle.sign("HMAC", cryptoKey, encodedMsg);
+                const hexMac = bufferToHex(signatureBuffer);
+                
+                senderMacOut.textContent = hexMac;
+                
+                btnSend.disabled = false;
+                btnDownload.style.display = 'inline-flex';
+                showToast("MAC Generated Successfully");
+                
+                // Clear receiver context if re-generating
+                recvMsg.value = '';
+                recvMac.value = '';
+                verifyResult.style.display = 'none';
+                verifyResult.classList.remove('show');
+                btnTamper.disabled = true;
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating MAC", "error");
+            } finally {
+                btnGen.disabled = false;
+                document.getElementById('ldr-generate').style.display = 'none';
+                document.getElementById('icon-generate').style.display = 'block';
+            }
+        });
+
+        // Simulaton: Send to Receiver
+        btnSend.addEventListener('click', () => {
+            recvMsg.value = senderMsg.value;
+            recvKey.value = senderKey.value;
+            recvMac.value = senderMacOut.textContent;
+            
+            showToast("Transmitted to Receiver successfully!");
+            btnTamper.disabled = false;
+
+            // Optional visual animation on receiver panel
+            document.getElementById('receiver-panel').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // 2. Verify MAC
+        btnVerify.addEventListener('click', async () => {
+            if(!recvMsg.value.trim() || !recvKey.value.trim() || !recvMac.value.trim()) {
+                return showToast("Complete all receiver fields required!", "error");
+            }
+
+            // Spinner Logic
+            btnVerify.disabled = true;
+            document.getElementById('icon-verify').style.display = 'none';
+            document.getElementById('ldr-verify').style.display = 'block';
+
+            try {
+                let isValid = false;
+                
+                // Strict Hex validation
+                const pattern = /^[0-9a-fA-F]+$/;
+                if(!pattern.test(recvMac.value)) throw new Error("Invalid MAC formatting");
+
+                const receiverBuf = hexToBuffer(recvMac.value);
+                const { cryptoKey, encodedMsg } = await createHmacNode(recvKey.value, recvMsg.value);
+                
+                isValid = await window.crypto.subtle.verify("HMAC", cryptoKey, receiverBuf, encodedMsg);
+
+                verifyResult.style.display = 'flex';
+                void verifyResult.offsetWidth; 
+                
+                if (isValid) {
+                    verifyResult.className = 'result-box show result-success';
+                    verifyResult.innerHTML = '<i data-lucide="shield-check" style="width:32px;height:32px;"></i> <div>Message is Authentic & Untampered. Both integrity and origin confirmed.</div>';
+                    showToast("Verification Successful");
+                } else {
+                    verifyResult.className = 'result-box show result-error';
+                    verifyResult.innerHTML = '<i data-lucide="alert-octagon" style="width:32px;height:32px;"></i> <div>Message Integrity Compromised! The MACs do not natively match.</div>';
+                    showToast("Verification Failed", "error");
+                }
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error(err);
+                verifyResult.style.display = 'flex';
+                verifyResult.className = 'result-box show result-error';
+                verifyResult.innerHTML = '<i data-lucide="alert-octagon" style="width:32px;height:32px;"></i> <div>Verification Aborted: Invalid MAC formatting or structural failure.</div>';
+                showToast("Verification Aborted", "error");
+                lucide.createIcons();
+            } finally {
+                btnVerify.disabled = false;
+                document.getElementById('ldr-verify').style.display = 'none';
+                document.getElementById('icon-verify').style.display = 'block';
+            }
+        });
+
+        // Simulation: Tamper Data
+        btnTamper.addEventListener('click', () => {
+            if(recvMsg.value.length > 0) {
+                // Change the last character to tamper the message
+                const curr = recvMsg.value;
+                recvMsg.value = curr.slice(0, -1) + (curr.endsWith('.') ? '!' : '.');
+                
+                // Add physical animation to the box showing a tamper act
+                recvMsg.classList.add('tamper-anim');
+                setTimeout(() => recvMsg.classList.remove('tamper-anim'), 500);
+                
+                verifyResult.style.display = 'none';
+                verifyResult.classList.remove('show');
+                showToast("Message maliciously modified!", "error");
+            }
+        });
+
+        // Export/Download Target Action
+        btnDownload.addEventListener('click', () => {
+            const data = `==== HMAC PAYLOAD ====\nMessage: ${senderMsg.value}\nMAC Signature: ${senderMacOut.textContent}`;
+            const blob = new Blob([data], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "HMAC_Payload.txt";
+            a.click();
+        });
+
+        // Reset All
+        btnClear.addEventListener('click', () => {
+            senderMsg.value = ''; senderKey.value = ''; senderMacOut.textContent = '-';
+            recvMsg.value = ''; recvKey.value = ''; recvMac.value = '';
+            
+            btnSend.disabled = true; btnDownload.style.display = 'none';
+            btnTamper.disabled = true;
+            
+            verifyResult.style.display = 'none';
+            verifyResult.classList.remove('show');
+            showToast("Simulation Reset");
+        });
+
+    </script>
+</body>
+</html>

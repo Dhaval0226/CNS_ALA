@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHA Integrity Analyzer | ALA 2</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Colors - Dark Theme (Default) */
+            --bg-start: #0f172a;
+            --bg-end: #1e293b;
+            
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --input-border: rgba(255, 255, 255, 0.1);
+            
+            --btn-blue: linear-gradient(135deg, #3b82f6, #2563eb);
+            --btn-gray: linear-gradient(135deg, #475569, #334155);
+            --btn-red: linear-gradient(135deg, #ef4444, #dc2626);
+
+            --diff-color: #ef4444;
+            --diff-bg: rgba(239, 68, 68, 0.2);
+            --match-color: #10b981;
+
+            /* Radii */
+            --radius-md: 16px;
+            --radius-btn: 10px;
+        }
+
+        [data-theme="light"] {
+            --bg-start: #f8fafc;
+            --bg-end: #e2e8f0;
+            
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --input-border: rgba(0, 0, 0, 0.1);
+            
+            --btn-blue: linear-gradient(135deg, #60a5fa, #3b82f6);
+            --btn-gray: linear-gradient(135deg, #94a3b8, #64748b);
+            --btn-red: linear-gradient(135deg, #f87171, #ef4444);
+            
+            --diff-color: #dc2626;
+            --diff-bg: rgba(239, 68, 68, 0.15);
+            --match-color: #059669;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header { text-align: center; margin-bottom: 20px; position: relative; }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute; right: 0; top: 0;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 50%; width: 44px; height: 44px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; color: var(--text-main); box-shadow: var(--card-shadow);
+        }
+
+        .title {
+            font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 700;
+            margin-bottom: 8px; letter-spacing: -0.5px;
+        }
+
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* Card (Apple Glassmorphism) */
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border); border-radius: var(--radius-md);
+            padding: 30px; box-shadow: var(--card-shadow); transition: transform 0.3s;
+        }
+
+        .card-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+        }
+        .card-header h2 { font-family: 'Poppins', sans-serif; font-size: 1.3rem; font-weight: 600; }
+        .card-header i { color: var(--text-muted); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Form Elements */
+        .input-group { display: flex; flex-direction: column; gap: 8px; position: relative; }
+
+        label { font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; color: var(--text-muted); }
+
+        textarea {
+            width: 100%; background: var(--input-bg); border: 1px solid var(--input-border);
+            border-radius: var(--radius-btn); padding: 16px; color: var(--text-main);
+            font-size: 0.95rem; font-family: 'Inter', sans-serif; resize: vertical; min-height: 120px;
+            outline: none; transition: border-color 0.3s;
+        }
+        textarea:focus { border-color: #60a5fa; }
+
+        .controls { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 12px 24px; border-radius: var(--radius-btn); font-family: 'Poppins', sans-serif;
+            font-weight: 600; font-size: 0.95rem; color: white; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform 0.3s, box-shadow 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn:hover { transform: scale(1.03) translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .btn:active { transform: scale(0.98); }
+        .btn-blue { background: var(--btn-blue); }
+        .btn-red { background: var(--btn-red); }
+        .btn-gray { background: var(--btn-gray); }
+
+        /* Hash Display Elements */
+        .hash-block { margin-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .hash-row { display: flex; flex-direction: column; gap: 8px; }
+        .hash-header { display: flex; justify-content: space-between; align-items: center; }
+        .hash-title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-family: 'Poppins', sans-serif; }
+        
+        .tooltip {
+            position: relative; display: inline-block; cursor: help; color: var(--text-muted);
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden; width: 220px; background-color: rgba(15,23,42,0.95);
+            color: #fff; text-align: left; padding: 10px; border-radius: 8px; font-size: 0.8rem;
+            position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -110px;
+            opacity: 0; transition: opacity 0.3s; font-family: 'Inter', sans-serif;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); font-weight: 400;
+        }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+        .hash-display {
+            background: var(--input-bg); border: 1px solid var(--input-border);
+            padding: 14px; border-radius: 8px; font-family: 'Fira Code', monospace;
+            font-size: 0.85rem; word-break: break-all; min-height: 50px; position: relative;
+            line-height: 1.5;
+        }
+
+        .diff-char {
+            color: var(--diff-color); background: var(--diff-bg); font-weight: bold;
+            border-radius: 2px;
+        }
+
+        .stats-bar {
+            background: rgba(0,0,0,0.1); padding: 8px 14px; border-radius: 8px;
+            display: inline-flex; align-items: center; gap: 10px; font-size: 0.85rem;
+            font-weight: 600; margin-left: auto; border: 1px solid var(--input-border);
+        }
+        .stat-match { color: var(--match-color); }
+        .stat-diff { color: var(--diff-color); }
+
+        /* Loader */
+        .loader {
+            border: 2px solid rgba(255,255,255,0.2); border-top: 2px solid white;
+            border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Avalanche Explanation Box */
+        .avalanche-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2); border-radius: var(--radius-md);
+            padding: 24px; display: flex; align-items: flex-start; gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .title { font-size: 1.8rem; }
+            header { text-align: left; margin-bottom: 30px; }
+            .theme-toggle { position: relative; display: inline-flex; margin-top: 15px; }
+            .controls { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1 class="title">SHA Integrity Analyzer</h1>
+            <p class="subtitle">Visualizing the Cryptographic Avalanche Effect</p>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+                <i data-lucide="sun" id="icon-sun" style="display:none;"></i>
+                <i data-lucide="moon" id="icon-moon"></i>
+            </button>
+        </header>
+
+        <!-- Explanation Section -->
+        <div class="avalanche-box">
+            <i data-lucide="info" style="color: #60a5fa; flex-shrink: 0; margin-top: 2px;"></i>
+            <div>
+                <h3 style="font-family: 'Poppins', sans-serif; margin-bottom: 6px;">The Avalanche Effect</h3>
+                <p style="font-size: 0.95rem; line-height: 1.5; color: var(--text-muted);">
+                    When an input is changed slightly (even by a single character or space), the resulting cryptographic hash output changes significantly (ideally by at least 50%). This makes it completely infeasible for attackers to predict hash outcomes or trace the hash back to its source.
+                </p>
+            </div>
+        </div>
+
+        <!-- Inputs Section -->
+        <section class="card">
+            <div class="card-header">
+                <i data-lucide="pen-tool"></i>
+                <h2>1. Text Inputs</h2>
+            </div>
+            
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Original Message</label>
+                    <textarea id="msg1">The quick brown fox jumps over the lazy dog</textarea>
+                </div>
+                <div class="input-group">
+                    <label>Modified Message</label>
+                    <textarea id="msg2">The quick brown fox jumps over the lazy dog.</textarea>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-analyze" class="btn btn-blue">
+                    <i data-lucide="zap" id="icon-analyze"></i>
+                    <div class="loader" id="ldr-analyze"></div>
+                    Analyze Hash
+                </button>
+                <button id="btn-auto" class="btn btn-gray"><i data-lucide="wand-2"></i> Auto Modify</button>
+                <button id="btn-clear" class="btn btn-red"><i data-lucide="trash-2"></i> Clear</button>
+                <button id="btn-export" class="btn btn-gray" style="margin-left:auto;"><i data-lucide="download"></i> Export Logs</button>
+            </div>
+        </section>
+
+        <!-- Hash Outputs Section -->
+        <section class="card">
+            <div class="card-header">
+                <i data-lucide="shield"></i>
+                <h2>2. Cryptographic Comparisons</h2>
+            </div>
+
+            <!-- SHA-1 -->
+            <div class="hash-block">
+                <div class="hash-row">
+                    <div class="hash-header">
+                        <div class="hash-title">
+                            SHA-1 
+                            <div class="tooltip"><i data-lucide="help-circle" style="width:14px;height:14px;"></i>
+                                <span class="tooltiptext">Generates a 160-bit (40 hex chars) hash. No longer considered cryptographically secure for highly sensitive operations due to collision vulnerabilities discovered in 2017.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <label>Original Hash</label>
+                    <div class="hash-display" id="sha1-orig">-</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                        <label>Modified Hash (Highlights indicate changes)</label>
+                        <div class="stats-bar" id="sha1-stats"><span class="stat-match">0% Match</span> | <span class="stat-diff">0% Difference</span></div>
+                    </div>
+                    <div class="hash-display" id="sha1-mod">-</div>
+                </div>
+            </div>
+
+            <hr style="border: 0; height: 1px; background: var(--card-border); margin: 30px 0;">
+
+            <!-- SHA-256 -->
+            <div class="hash-block">
+                <div class="hash-row">
+                    <div class="hash-header">
+                        <div class="hash-title">
+                            SHA-256
+                            <div class="tooltip"><i data-lucide="help-circle" style="width:14px;height:14px;"></i>
+                                <span class="tooltiptext">Generates a 256-bit (64 hex chars) hash. The current global standard for securing passwords, SSL certificates, and Blockchain transactions.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <label>Original Hash</label>
+                    <div class="hash-display" id="sha256-orig">-</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                        <label>Modified Hash</label>
+                        <div class="stats-bar" id="sha256-stats"><span class="stat-match">0% Match</span> | <span class="stat-diff">0% Difference</span></div>
+                    </div>
+                    <div class="hash-display" id="sha256-mod">-</div>
+                </div>
+            </div>
+
+            <hr style="border: 0; height: 1px; background: var(--card-border); margin: 30px 0;">
+
+            <!-- SHA-512 -->
+            <div class="hash-block">
+                <div class="hash-row">
+                    <div class="hash-header">
+                        <div class="hash-title">
+                            SHA-512
+                            <div class="tooltip"><i data-lucide="help-circle" style="width:14px;height:14px;"></i>
+                                <span class="tooltiptext">Generates a 512-bit (128 hex chars) hash. Used in applications demanding extremely high security or utilizing 64-bit hardware processing efficiency.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <label>Original Hash</label>
+                    <div class="hash-display" id="sha512-orig">-</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                        <label>Modified Hash</label>
+                        <div class="stats-bar" id="sha512-stats"><span class="stat-match">0% Match</span> | <span class="stat-diff">0% Difference</span></div>
+                    </div>
+                    <div class="hash-display" id="sha512-mod">-</div>
+                </div>
+            </div>
+
+        </section>
+
+        <div style="text-align: center; margin-top: 10px;">
+            <a href="home.html" class="btn btn-gray" style="text-decoration:none;"><i data-lucide="arrow-left"></i> Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // Theme Logic
+        const themeBtn = document.getElementById('themeToggle');
+        const iconSun = document.getElementById('icon-sun');
+        const iconMoon = document.getElementById('icon-moon');
+        const htmlElement = document.documentElement;
+
+        const currentTheme = localStorage.getItem('sha-theme') || 'dark';
+        setTheme(currentTheme);
+
+        themeBtn.addEventListener('click', () => {
+            const newTheme = htmlElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+            localStorage.setItem('sha-theme', newTheme);
+        });
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            if(theme === 'dark') {
+                iconSun.style.display = 'none'; iconMoon.style.display = 'block';
+            } else {
+                iconSun.style.display = 'block'; iconMoon.style.display = 'none';
+            }
+        }
+
+        // Web Crypto API Wrapper
+        async function calculateHash(algorithm, text) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest(algorithm, data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Diff Visualizer
+        function getHexDiff(origHex, modHex) {
+            let html = '';
+            let diffCount = 0;
+            
+            // Iterate through every character
+            for(let i = 0; i < modHex.length; i++) {
+                if (origHex[i] === modHex[i]) {
+                    html += modHex[i];
+                } else {
+                    html += `<span class="diff-char">${modHex[i]}</span>`;
+                    diffCount++;
+                }
+            }
+            
+            const diffPercent = ((diffCount / modHex.length) * 100).toFixed(1);
+            return { html, diffPercent };
+        }
+
+        // UI Interactions
+        const btnAnalyze = document.getElementById('btn-analyze');
+        const input1 = document.getElementById('msg1');
+        const input2 = document.getElementById('msg2');
+
+        const outSha1Orig = document.getElementById('sha1-orig');
+        const outSha1Mod = document.getElementById('sha1-mod');
+        const statsSha1 = document.getElementById('sha1-stats');
+
+        const outSha256Orig = document.getElementById('sha256-orig');
+        const outSha256Mod = document.getElementById('sha256-mod');
+        const statsSha256 = document.getElementById('sha256-stats');
+
+        const outSha512Orig = document.getElementById('sha512-orig');
+        const outSha512Mod = document.getElementById('sha512-mod');
+        const statsSha512 = document.getElementById('sha512-stats');
+
+        btnAnalyze.addEventListener('click', async () => {
+            const val1 = input1.value;
+            const val2 = input2.value;
+
+            // UI Loading logic
+            btnAnalyze.disabled = true;
+            document.getElementById('icon-analyze').style.display = 'none';
+            document.getElementById('ldr-analyze').style.display = 'block';
+
+            // Sleep small amount so UI renders loading state
+            await new Promise(r => setTimeout(r, 100));
+
+            try {
+                // Determine Hashes
+                const hash1_sha1 = await calculateHash("SHA-1", val1);
+                const hash2_sha1 = await calculateHash("SHA-1", val2);
+                
+                const hash1_sha256 = await calculateHash("SHA-256", val1);
+                const hash2_sha256 = await calculateHash("SHA-256", val2);
+                
+                const hash1_sha512 = await calculateHash("SHA-512", val1);
+                const hash2_sha512 = await calculateHash("SHA-512", val2);
+
+                // SHA-1
+                outSha1Orig.textContent = hash1_sha1;
+                const diffSha1 = getHexDiff(hash1_sha1, hash2_sha1);
+                outSha1Mod.innerHTML = diffSha1.html;
+                statsSha1.innerHTML = `<span class="stat-match">${(100 - diffSha1.diffPercent).toFixed(1)}% Match</span> | <span class="stat-diff">${diffSha1.diffPercent}% Changed</span>`;
+
+                // SHA-256
+                outSha256Orig.textContent = hash1_sha256;
+                const diffSha256 = getHexDiff(hash1_sha256, hash2_sha256);
+                outSha256Mod.innerHTML = diffSha256.html;
+                statsSha256.innerHTML = `<span class="stat-match">${(100 - diffSha256.diffPercent).toFixed(1)}% Match</span> | <span class="stat-diff">${diffSha256.diffPercent}% Changed</span>`;
+
+                // SHA-512
+                outSha512Orig.textContent = hash1_sha512;
+                const diffSha512 = getHexDiff(hash1_sha512, hash2_sha512);
+                outSha512Mod.innerHTML = diffSha512.html;
+                statsSha512.innerHTML = `<span class="stat-match">${(100 - diffSha512.diffPercent).toFixed(1)}% Match</span> | <span class="stat-diff">${diffSha512.diffPercent}% Changed</span>`;
+
+            } catch(e) {
+                console.error(e);
+            }
+
+            // End Loading
+            document.getElementById('ldr-analyze').style.display = 'none';
+            document.getElementById('icon-analyze').style.display = 'block';
+            btnAnalyze.disabled = false;
+        });
+
+        // Auto Modify Button
+        document.getElementById('btn-auto').addEventListener('click', () => {
+            const current = input2.value;
+            // Slightly modify the string by altering the last character or adding one
+            if(current.endsWith('.')) {
+                input2.value = current.slice(0, -1) + '!';
+            } else if (current.endsWith('!')) {
+                input2.value = current.slice(0, -1) + '?';
+            } else {
+                input2.value = current + '.';
+            }
+            
+            // Auto Trigger analyze
+            btnAnalyze.click();
+        });
+
+        // Clear Button
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            input1.value = '';
+            input2.value = '';
+            
+            outSha1Orig.textContent = '-'; outSha1Mod.textContent = '-';
+            outSha256Orig.textContent = '-'; outSha256Mod.textContent = '-';
+            outSha512Orig.textContent = '-'; outSha512Mod.textContent = '-';
+            
+            const blankStat = '<span class="stat-match">0% Match</span> | <span class="stat-diff">0% Difference</span>';
+            statsSha1.innerHTML = blankStat;
+            statsSha256.innerHTML = blankStat;
+            statsSha512.innerHTML = blankStat;
+        });
+
+        // Export Logs Handler
+        document.getElementById('btn-export').addEventListener('click', () => {
+            if(outSha256Orig.textContent === '-') return alert("Run analysis first to export logs!");
+            
+            const logContent = `SHA INTEGRITY ANALYZER - EXPORT LOG\n=================================\n\n` +
+            `Message 1: ${input1.value}\nMessage 2: ${input2.value}\n\n` +
+            `[SHA-1]\nOriginal: ${outSha1Orig.textContent}\nModified: ${outSha1Mod.innerText}\n\n` + 
+            `[SHA-256]\nOriginal: ${outSha256Orig.textContent}\nModified: ${outSha256Mod.innerText}\n\n` +
+            `[SHA-512]\nOriginal: ${outSha512Orig.textContent}\nModified: ${outSha512Mod.innerText}\n`;
+
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "sha_avalanche_report.txt";
+            a.click();
+        });
+
+        // Run analysis on load
+        window.addEventListener('DOMContentLoaded', () => {
+            btnAnalyze.click();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyanmanjari Innovative University</title>
+    <!-- Use Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* 8px spacing system */
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --space-5: 40px;
+            --space-6: 48px;
+            --space-8: 64px;
+
+            /* Colors */
+            --bg-dark-1: #0f172a;
+            --bg-dark-2: #1e293b;
+            --bg-dark-3: #020617;
+
+            --text-main: #f8fafc;
+            --text-value: #f1f5f9;
+            --text-label: #94a3b8;
+
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-card: rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+
+            /* Glows */
+            --glow-purple: #9333ea;
+            --glow-pink: #ec4899;
+            --glow-blue: #3b82f6;
+            --glow-cyan: #06b6d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-dark-1), var(--bg-dark-2), var(--bg-dark-3));
+            background-size: 200% 200%;
+            animation: gradientMove 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Blurred gradient blobs */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: 0;
+            animation: floatBlob 10s ease-in-out infinite alternate;
+            border-radius: 50%;
+        }
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.4), transparent 70%);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.3), transparent 70%);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -3s;
+        }
+
+        .blob-3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent 70%);
+            top: 20%;
+            left: 60%;
+            animation-delay: -6s;
+        }
+
+        @keyframes floatBlob {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(30px) scale(1.1);
+            }
+
+            100% {
+                transform: translateY(-30px) scale(0.9);
+            }
+        }
+
+        /* Mouse Follow Glow */
+        #cursor-glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            transition: width 0.3s, height 0.3s;
+        }
+
+        /* Main Container */
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            padding: var(--space-2);
+            width: 100%;
+            max-width: 900px;
+            perspective: 1000px;
+        }
+
+        /* Glassmorphism Card */
+        .main-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: var(--space-5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transform-style: preserve-3d;
+            animation: cardEntrance 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: transform 0.1s ease-out;
+            /* For 3D tilt */
+        }
+
+        @keyframes cardEntrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-5);
+            transform: translateZ(30px);
+        }
+
+        .header-icon-container {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto var(--space-3);
+            background: linear-gradient(135deg, var(--glow-purple), var(--glow-pink), var(--glow-blue));
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.4);
+            animation: floatIcon 4s ease-in-out infinite alternate;
+        }
+
+        .header-icon-container i {
+            color: white;
+            width: 36px;
+            height: 36px;
+        }
+
+        @keyframes floatIcon {
+            from {
+                transform: translateY(-5px);
+            }
+
+            to {
+                transform: translateY(5px);
+            }
+        }
+
+        .title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            letter-spacing: -0.5px;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-3);
+            margin-bottom: var(--space-5);
+            transform: translateZ(20px);
+            perspective: 800px;
+        }
+
+        .info-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardStagger 0.6s ease-out forwards;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .info-grid .info-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .info-grid .info-card:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .info-grid .info-card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .info-grid .info-card:nth-child(4) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes cardStagger {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .info-card:hover::before {
+            opacity: 1;
+        }
+
+        .info-card:hover.card-purple {
+            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.15), inset 0 0 0 1px rgba(147, 51, 234, 0.3);
+        }
+
+        .info-card:hover.card-pink {
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.15), inset 0 0 0 1px rgba(236, 72, 153, 0.3);
+        }
+
+        .info-card:hover.card-blue {
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15), inset 0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+
+        .info-card:hover.card-cyan {
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15), inset 0 0 0 1px rgba(6, 182, 212, 0.3);
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .icon-box::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.6;
+        }
+
+        .card-purple .icon-box {
+            color: var(--glow-purple);
+        }
+
+        .card-purple .icon-box::after {
+            background: var(--glow-purple);
+        }
+
+        .card-pink .icon-box {
+            color: var(--glow-pink);
+        }
+
+        .card-pink .icon-box::after {
+            background: var(--glow-pink);
+        }
+
+        .card-blue .icon-box {
+            color: var(--glow-blue);
+        }
+
+        .card-blue .icon-box::after {
+            background: var(--glow-blue);
+        }
+
+        .card-cyan .icon-box {
+            color: var(--glow-cyan);
+        }
+
+        .card-cyan .icon-box::after {
+            background: var(--glow-cyan);
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-label);
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-value);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Buttons section */
+        .actions {
+            display: flex;
+            gap: var(--space-3);
+            justify-content: center;
+            transform: translateZ(25px);
+        }
+
+        .btn {
+            position: relative;
+            padding: 14px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardStagger 0.6s ease-out forwards;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .actions .btn:nth-child(1) {
+            animation-delay: 0.6s;
+        }
+
+        .actions .btn:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+
+        .actions .btn:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px) scale(1.08);
+            /* Requested scale */
+        }
+
+        /* Ripple effect container */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            background-color: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .btn-1 {
+            background: linear-gradient(135deg, #7c3aed, #9333ea);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-1:hover {
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.5);
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            /* Shift gradient */
+        }
+
+        .btn-2 {
+            background: linear-gradient(135deg, #ec4899, #f43f5e);
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-2:hover {
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.5);
+            background: linear-gradient(135deg, #f472b6, #fb7185);
+        }
+
+        .btn-3 {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-3:hover {
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, #60a5fa, #22d3ee);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .main-card {
+                padding: var(--space-4) var(--space-3);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Mouse follow glow -->
+    <div id="cursor-glow"></div>
+
+    <div class="wrapper" id="card-wrapper">
+        <main class="main-card" id="tilt-card">
+
+            <header class="header">
+                <div class="header-icon-container">
+                    <i data-lucide="graduation-cap"></i>
+                </div>
+                <h1 class="title">Gyanmanjari Innovative University</h1>
+            </header>
+
+            <div class="info-grid">
+
+                <div class="info-card card-purple">
+                    <div class="icon-box">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-label">Developer</span>
+                        <span class="card-value">KHASIYA DHAVAL</span>
+                    </div>
+                </div>
+
+                <div class="info-card card-pink">
+                    <div class="icon-box">
+                        <i data-lucide="hash"></i>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-label">Enrollment No</span>
+                        <span class="card-value">20230905090042</span>
+                    </div>
+                </div>
+
+                <div class="info-card card-blue">
+                    <div class="icon-box">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-label">Subject</span>
+                        <span class="card-value">Cryptografy and Network Security</span>
+                    </div>
+                </div>
+
+                <div class="info-card card-cyan">
+                    <div class="icon-box">
+                        <i data-lucide="code-2"></i>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-label">Code</span>
+                        <span class="card-value">BETIT16326</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="actions">
+                <a href="ala1.html" class="btn btn-1">ALA 1</a>
+                <a href="ala2.html" class="btn btn-2">ALA 2</a>
+                <a href="ala3.html" class="btn btn-3">ALA 3</a>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Cursor Glow Effect
+        const cursorGlow = document.getElementById('cursor-glow');
+
+        document.addEventListener('mousemove', (e) => {
+            cursorGlow.style.left = e.clientX + 'px';
+            cursorGlow.style.top = e.clientY + 'px';
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursorGlow.style.width = '250px';
+            cursorGlow.style.height = '250px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursorGlow.style.width = '300px';
+            cursorGlow.style.height = '300px';
+        });
+
+        // 3D Tilt Effect on the Card
+        const wrapper = document.getElementById('card-wrapper');
+        const card = document.getElementById('tilt-card');
+
+        wrapper.addEventListener('mousemove', (e) => {
+            const rect = wrapper.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            // Calculate tilt based on cursor position relative to center
+            const tiltX = ((y - centerY) / centerY) * -5; // max 5 degrees
+            const tiltY = ((x - centerX) / centerX) * 5;  // max 5 degrees
+
+            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.01, 1.01, 1.01)`;
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            // Smooth reset
+            card.style.transition = 'transform 0.5s ease-out';
+            setTimeout(() => {
+                card.style.transition = 'transform 0.1s ease-out';
+            }, 500);
+        });
+
+        wrapper.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.1s ease-out';
+        });
+
+        // Ripple Effect for buttons
+        const buttons = document.querySelectorAll('.btn');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                const x = e.clientX - e.target.getBoundingClientRect().left;
+                const y = e.clientY - e.target.getBoundingClientRect().top;
+
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                this.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
+</body>
+
+</html>
